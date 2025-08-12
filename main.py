@@ -2,35 +2,30 @@ import os
 import random
 import telebot
 
-# Pega o token do bot nas variáveis de ambiente
 TOKEN = os.getenv("TOKEN")
 bot = telebot.TeleBot(TOKEN)
 
-# Função para gerar o tabuleiro do Mines
-def generate_mines_grid(size=5, mines=5):
-    grid = [["⬜" for _ in range(size)] for _ in range(size)]
-    mine_positions = set()
+# Função para gerar um sinal Mines
+def gerar_sinal_mines():
+    minas = random.randint(2, 5)  # número de minas
+    posicoes_seguras = random.sample(range(1, 26), 5)  # 5 posições seguras
+    multiplicador = round(random.uniform(1.5, 5.0), 2)  # multiplicador estimado
+    sinal = (
+        "🎯 *Sinal Mines* 🎯\n"
+        f"💣 Minas: {minas}\n"
+        f"🟦 Clique nas posições: {' '.join(str(p) for p in posicoes_seguras)}\n"
+        f"📈 Multiplicador alvo: x{multiplicador}"
+    )
+    return sinal
 
-    while len(mine_positions) < mines:
-        x = random.randint(0, size - 1)
-        y = random.randint(0, size - 1)
-        mine_positions.add((x, y))
-
-    for (x, y) in mine_positions:
-        grid[x][y] = "💣"
-
-    return "\n".join("".join(row) for row in grid)
-
-# Comando /start
 @bot.message_handler(commands=["start"])
 def start(message):
-    bot.reply_to(message, "Bot Mines está ativo! Envie /mine para gerar um jogo.")
+    bot.reply_to(message, "Bot de Sinais Mines ativo! Use /sinal para gerar um.")
 
-# Comando /mine
-@bot.message_handler(commands=["mine"])
-def send_mines(message):
-    grid = generate_mines_grid()
-    bot.send_message(message.chat.id, f"💎 *Mines Game* 💎\n\n{grid}", parse_mode="Markdown")
+@bot.message_handler(commands=["sinal"])
+def enviar_sinal(message):
+    sinal = gerar_sinal_mines()
+    bot.send_message(message.chat.id, sinal, parse_mode="Markdown")
 
 if __name__ == "__main__":
     print("Bot rodando...")
